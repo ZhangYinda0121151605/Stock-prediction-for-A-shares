@@ -1,5 +1,5 @@
 ## 1.简介
-LSTM Networks是递归神经网络（RNNs）的一种，该算法由Sepp Hochreiter和Jurgen Schmidhuber在Neural Computation上首次公布。后经过人们的不断改进，LSTM的内部结构逐渐变得完善起来。在处理和预测时间序列相关的数据时会比一般的RNNs表现的更好。目前，LSTM Networks已经被广泛应用在机器人控制、文本识别及预测、语音识别、蛋白质同源检测等领域。
+LSTM Networks是递归神经网络（RNNs）的一种，该算法由Sepp Hochreiter和Jurgen Schmidhuber在Neural Computation上首次公布，已经在众多自然语言处理(Natural Language Processing, NLP)中取得了巨大成功以及广泛应用。后经过人们的不断改进，LSTM的内部结构逐渐变得完善起来。在处理和预测时间序列相关的数据时会比一般的RNNs表现的更好。目前，LSTM Networks已经被广泛应用在机器人控制、文本识别及预测、语音识别、蛋白质同源检测等领域。
 ## 2.流程
 数据获取与处理：对于时间序列，我们通常会以[X(t-n),X(t-n+1),…,X(t-1),X(t)]这n个时刻的数据作为输入来预测(t+1)时刻的输出。对于股票来说，在t时刻会有若干个features，因此，为了丰富features以使模型更加精确，本文将n(time series)×s(features per time series)的二维向量作为输入。LSTM对于数据标准化的要求很高，因此本文所有input数据均经过z-score标准化处理。
 LSTM模型构建：作为循环层的一种神经网络结构，只使用LSTM并不能构建出一个完整的模型，LSTM还需要与其他神经网络层（如Dense层、卷积层等）配合使用。此外，还可以构建多层LSTM层来增加模型的复杂性。
@@ -30,6 +30,6 @@ output为未来5日收益future_return_5（future_return_5>0.2,取0.2;future_ret
 除了传统的Sequential Model(一输入，一输出)外，本文还尝试构建了Functional Model(支持多输入，多输出)。前面提到的features处理方法丢失了一项重要的信息：价格的高低。相同的input处在3000点和6000点时的future_return_5可能有很大不同。因此，本文尝试构建了"二输入一输出"的Functional Model:标准化后的features作为input输入LSTM层,LSTM层的输出结果和一个指标-label(label=np.round(close/500))作为input输入后面的Dense层，最终输出仍为future_return_5(图7)。
 回测结果如图8。由回测结果可以看出，加入指示标后的LSTM模型收益率相对下降，但是回撤更小。LSTM预测值小于0的时间段覆盖了沪深300上大多数大幅下跌的时间段,虽然也错误地将一些震荡或上涨趋势划归为下跌趋势。或许这是不可避免的，俗话说高风险高回报，风险低那么回报也不会非常高，高回报和低风险往往不可兼得。
 ## 5.结论与展望
-通过探究性地应用LSTM对沪深300未来五日收益率进行预测，初步说明了LSTM Networks是可以用在股票市场上的。
+通过探究性地应用LSTM对沪深300未来五日收益率进行预测，初步说明了LSTM Networks在股票市场上应用的可行性。
 由于LSTM更适用于处理个股/指数，因此，将LSTM作为择时模型与其他选股模型配合使用效果较好。利用LSTM模型对沪深300数据进行预测并将结果作为择时信号，可以显著改善stockranker选股模型在回测阶段的回撤。
 展望：由于个股数据量较少，LSTM模型的可扩展程度和复杂度受到很大制约，features的选择也受到限制（若input的features太多，而data较少的话，会使一部分features不能发挥出应有的作用，也极易造成过拟合）。将来我们希望能在个股/指数的小时或分钟数据上测试LSTM的性能。另外，将探究LSTM模型能否将属于一个行业的所有股票data一起处理也是一个可选的方向。
